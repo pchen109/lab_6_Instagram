@@ -8,10 +8,6 @@
  *
  */
 
-const AdmZip = require("adm-zip");
-const zip = new AdmZip("./myfile.zip");
-zip.extractAllTo("./extracted", true);
-
 const unzipper = require("unzipper"),
   // fs = require("fs/promises"),
   // { createReadStream, createWriteStream } = require("fs"),
