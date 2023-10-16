@@ -97,7 +97,9 @@ const grayScale = (pathIn, pathOut) => {
     const png = new PNG({ filterType: 4});
 
     readStream
+    .on("error", reject)
     .pipe(png)
+    .on("error", reject)
     .on('parsed', function () {
         for (var y = 0; y < this.height; y++) {
           for (var x = 0; x < this.width; x++) {
@@ -112,8 +114,12 @@ const grayScale = (pathIn, pathOut) => {
             this.data[idx + 3] = this.data[idx + 3] >> 1;
           }
         }
-        this.pack().pipe(writeStream);
+        this.pack()
+        .pipe(writeStream)
+        .on("error", reject)
+        .on("finish", resolve)
       })
+    .on("end", resolve)
   })
 };
 

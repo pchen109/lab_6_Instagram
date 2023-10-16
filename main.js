@@ -2,10 +2,10 @@ const path = require("path");
 /*
  * Project: Milestone 1
  * File Name: main.js
- * Description:
+ * Description: It's a milestone.
  *
- * Created Date:
- * Author:
+ * Created Date: Oct 10, 2023
+ * Author: Peter (Yu Yen) Chen
  *
  */
 
