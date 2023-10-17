@@ -17,7 +17,9 @@ const AdmZip = require("adm-zip");
 const zip = new AdmZip("./myfile.zip");
 
 IOhandler.unzip(zipFilePath, "./unzipped")
-    // unzip cannot open image so I'm using AdmZip here
+    // .then((result) => {
+    //     console.log(result);
+    // })
     .then(() => zip.extractAllTo("./extracted", true))
     .then(() => IOhandler.readDir(pathUnzipped))
     .then((files) => {

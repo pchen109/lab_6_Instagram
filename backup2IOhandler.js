@@ -2,7 +2,7 @@ const unzipper = require("unzipper"),
   fs = require("fs"),
   PNG = require("pngjs").PNG,
   path = require("path"),
-  { pipeline } = require('stream');
+  { pipeline, Transform } = require('stream');
 
 /**
  * Description: decompress file from given pathIn, write to given pathOut
@@ -12,20 +12,16 @@ const unzipper = require("unzipper"),
  * @return {promise}
  */
 
+
 const unzip = (pathIn, pathOut) => {
   return new Promise((resolve, reject) => {
     const readStream = fs.createReadStream(pathIn);
     const unzip = unzipper.Extract({ path: pathOut })
-    // Use resolve reject here in errorHandler.
     const errorHandler = (err) => {
-      if (err) {
-        console.log(err);
-        reject(err);
-      } else {
-        resolve();
-      }
+      if (err) { console.log(err); }
     }
     pipeline(readStream, unzip, errorHandler)
+    resolve(pathOut)
   })
 };
 
@@ -80,6 +76,11 @@ function processImage(data) {
   }
 }
 
+// path.basename can replace these two lines
+// const pathElements = pathIn.split(path.sep);
+// const fileName = pathElements[pathElements.length - 1];
+
+
 const grayScale = (pathIn, pathOut) => {
   return new Promise((resolve, reject) => {
     const readStream = fs.createReadStream(pathIn);
@@ -88,13 +89,12 @@ const grayScale = (pathIn, pathOut) => {
     const filePath = path.join(pathOut, `grey_${fileName}`)
     const writeStream = fs.createWriteStream(filePath);
     const png = new PNG({ filterType: 4});
-
-    // Use resolve reject here in errorHandler.
     const errorHandler = (err) => {
       if (err) {
         console.log(err);
         reject(err);
       } else {
+        console.log("Image processing complete.")
         resolve();
       }
     }
@@ -104,10 +104,16 @@ const grayScale = (pathIn, pathOut) => {
       processImage(this);
 
       // Continue with the pipeline
+      // Don't need .on("error", reject).on("finish", resolve) 
+      //        **** because it's still in PIPELINE ****
       this.pack().pipe(writeStream)
     })
 
-    pipeline(readStream, png, errorHandler)
+    pipeline(
+      readStream,
+      png,
+      errorHandler
+    )
   })
 };
 

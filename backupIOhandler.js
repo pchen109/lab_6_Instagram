@@ -1,4 +1,16 @@
+/*
+ * Project: Milestone 1
+ * File Name: IOhandler.js
+ * Description: Collection of functions for files input/output related operations
+ *
+ * Created Date:
+ * Author:
+ *
+ */
+
 const unzipper = require("unzipper"),
+  // fs = require("fs/promises"),
+  // { createReadStream, createWriteStream } = require("fs"),
   fs = require("fs"),
   PNG = require("pngjs").PNG,
   path = require("path"),
@@ -12,20 +24,28 @@ const unzipper = require("unzipper"),
  * @return {promise}
  */
 
+// METHOD I : USING PIPE
+// const unzip = (pathIn, pathOut) => {
+//   return new Promise((resolve, reject) => {
+//     fs.createReadStream(pathIn)
+//     .on("error", reject)
+//     .pipe(unzipper.Extract({ path: pathOut}))
+//     .on("error", reject)
+//     .on("end", resolve)
+//   })
+// };
+
+
+// METHOD II: Using PIPELINE
 const unzip = (pathIn, pathOut) => {
   return new Promise((resolve, reject) => {
     const readStream = fs.createReadStream(pathIn);
     const unzip = unzipper.Extract({ path: pathOut })
-    // Use resolve reject here in errorHandler.
     const errorHandler = (err) => {
-      if (err) {
-        console.log(err);
-        reject(err);
-      } else {
-        resolve();
-      }
+      if (err) { console.log(err); }
     }
     pipeline(readStream, unzip, errorHandler)
+    resolve(pathOut)
   })
 };
 
@@ -64,50 +84,42 @@ const readDir = (dir) => {
  */
 
 
-function processImage(data) {
-  for (var y = 0; y < data.height; y++) {
-    for (var x = 0; x < data.width; x++) {
-      var idx = (data.width * y + x) << 2;
-
-      // Invert color
-      data.data[idx] = 255 - data.data[idx];
-      data.data[idx + 1] = 255 - data.data[idx + 1];
-      data.data[idx + 2] = 255 - data.data[idx + 2];
-
-      // Reduce opacity
-      data.data[idx + 3] = data.data[idx + 3] >> 1;
-    }
-  }
-}
 
 const grayScale = (pathIn, pathOut) => {
   return new Promise((resolve, reject) => {
     const readStream = fs.createReadStream(pathIn);
     // Provides the platform-specific path segment separator:
-    const fileName = path.basename(pathIn);
+    const pathElements = pathIn.split(path.sep);
+    // console.log(pathElements)
+    const fileName = pathElements[pathElements.length - 1];
     const filePath = path.join(pathOut, `grey_${fileName}`)
     const writeStream = fs.createWriteStream(filePath);
     const png = new PNG({ filterType: 4});
 
-    // Use resolve reject here in errorHandler.
-    const errorHandler = (err) => {
-      if (err) {
-        console.log(err);
-        reject(err);
-      } else {
-        resolve();
-      }
-    }
-
-    png.on("parsed", function () {
-      // call the processImage function inside "parse"
-      processImage(this);
-
-      // Continue with the pipeline
-      this.pack().pipe(writeStream)
-    })
-
-    pipeline(readStream, png, errorHandler)
+    readStream
+    .on("error", reject)
+    .pipe(png)
+    .on("error", reject)
+    .on('parsed', function () {
+        for (var y = 0; y < this.height; y++) {
+          for (var x = 0; x < this.width; x++) {
+            var idx = (this.width * y + x) << 2;
+    
+            // invert color
+            this.data[idx] = 255 - this.data[idx];
+            this.data[idx + 1] = 255 - this.data[idx + 1];
+            this.data[idx + 2] = 255 - this.data[idx + 2];
+    
+            // and reduce opacity
+            this.data[idx + 3] = this.data[idx + 3] >> 1;
+          }
+        }
+        this.pack()
+        .pipe(writeStream)
+        .on("error", reject)
+        .on("finish", resolve)
+      })
+    .on("end", resolve)
   })
 };
 
