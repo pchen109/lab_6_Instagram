@@ -1,14 +1,14 @@
-const path = require("path");
 /*
- * Project: Milestone 1
- * File Name: main.js
- * Description: It's a milestone.
- *
- * Created Date: Oct 10, 2023
- * Author: Peter (Yu Yen) Chen
- *
- */
+* Project: Milestone 1
+* File Name: main.js
+* Description: It's a milestone.
+*
+* Created Date: Oct 10, 2023
+* Author: Peter (Yu Yen) Chen
+*
+*/
 
+const path = require("path");
 const IOhandler = require("./IOhandler");
 const zipFilePath = path.join(__dirname, "myfile.zip");
 const pathUnzipped = path.join(__dirname, "extracted");
