@@ -22,7 +22,7 @@ IOhandler.unzip(zipFilePath, "./unzipped")
     .then(() => IOhandler.readDir(pathUnzipped))
     .then((files) => {
         const promises = files.map((file) => IOhandler.grayScale(file, pathProcessed))
-        Promise.all(promises)
+        return Promise.all(promises)
         // files.forEach((file) => { IOhandler.grayScale(file, pathProcessed)})
     })
     // All promises are resolved before moving on to further processing

@@ -88,27 +88,29 @@ const grayScale = (pathIn, pathOut) => {
     const filePath = path.join(pathOut, `grey_${fileName}`)
     const writeStream = fs.createWriteStream(filePath);
     const png = new PNG({ filterType: 4});
-
-    // Use resolve reject here in errorHandler.
     const errorHandler = (err) => {
       if (err) {
         console.log(err);
         reject(err);
-      } else {
-        resolve();
-      }
+      } 
+      resolve();
     }
-
+    
+    // Use resolve reject here in errorHandler.
+    
     png.on("parsed", function () {
       // call the processImage function inside "parse"
       processImage(this);
 
       // Continue with the pipeline
       this.pack().pipe(writeStream)
+      /////////////////////////////////////////////////////
+      // Need "finsih" for every fs.createWriteStream!!! //
+      ////////////////////////////////////////////////////;
+      .on("finish", resolve)
     })
     
-    // NEED COMMA AT THEN END!!! IDK WHY
-    pipeline(readStream, png, errorHandler,)
+    pipeline(readStream, png, errorHandler)
   })
 };
 
