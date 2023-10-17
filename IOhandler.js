@@ -106,8 +106,9 @@ const grayScale = (pathIn, pathOut) => {
       // Continue with the pipeline
       this.pack().pipe(writeStream)
     })
-
-    pipeline(readStream, png, errorHandler)
+    
+    // NEED COMMA AT THEN END!!! IDK WHY
+    pipeline(readStream, png, errorHandler,)
   })
 };
 
